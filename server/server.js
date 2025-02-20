@@ -24,7 +24,7 @@ app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 })
 
-Start server function
+// Start server function
 // const startServer = async () => {
 //     try {
 //         // Connect to database
