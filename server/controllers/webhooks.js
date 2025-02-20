@@ -16,9 +16,9 @@ export const clerkWebhooks = async (req, res) => {
     const { data, type } = req.body
 
     // Switch Cases for differernt Events
-    console.log("Event Type:", type)
     switch (type) {
         case 'user.created': {
+          console.log("Event Type:", type)
           const userData = {
             _id: data.id,
             email: data.email_addresses[0].email_address,
