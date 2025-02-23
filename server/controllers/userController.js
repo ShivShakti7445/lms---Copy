@@ -126,3 +126,41 @@ export const getUserCourseProgress = async (req, res) => {
         res.json({ success: false, message: error.message })
     }
 }
+
+// Add User Ratings to Course
+export const addUserRating = async (req, res) => {
+    const userId = req.auth.userId;
+    const { courseId, rating } = req.body;
+    // Validate inputs
+    if (!courseId || !userId || !rating || rating < 1 || rating > 5) {
+        return res.json({ success: false, message: 'InValid Details' });
+    }
+
+    try {
+        // Find the course by ID
+        const course = await Course.findById(courseId);
+        if (!course) {
+            return res.json({ success: false, message: 'Course not found.' });
+        }
+        const user = await User.findById(userId);
+        if (!user || !user.enrolledCourses.includes(courseId)) {
+            return res.json({ success: false, message: 'User has not purchased this course.' });
+        }
+
+        // Check is user already rated
+        const existingRatingIndex = course.courseRatings.findIndex(r => r.userId === userId);
+        if (existingRatingIndex > -1) {
+            // Update the existing rating
+            course.courseRatings[existingRatingIndex].rating = rating;
+        } 
+        else {
+            // Add a new rating
+            course.courseRatings.push({ userId, rating });
+        } 
+        await course.save();
+        
+        return res.json({ success: true, message: 'Rating added' });
+    } catch (error) {
+        return res.json({ success: false, message: error.message });
+    }
+};
