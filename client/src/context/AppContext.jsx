@@ -12,14 +12,12 @@ export const AppContext = createContext()
 export const AppContextProvider = (props) => {
      
     const backendUrl = import.meta.env.VITE_BACKEND_URL
-
     const navigate = useNavigate()
     const { getToken } = useAuth()
     const { user } = useUser()
-    
     const currency = import.meta.env.VITE_CURRENCY
     const [allCourses, setAllCourses] = useState([])
-    const [isEducator,setIsEducator] = useState(true)
+    const [isEducator,setIsEducator] = useState(false)
     const [enrolledCourses, setEnrolledCourses] = useState([])
     const [userData, setUserData] = useState(null)
     
@@ -40,16 +38,17 @@ export const AppContextProvider = (props) => {
 
 // Fetch UserData 
 const fetchUserData = async () => {
+    if (user .publicMetadata.role === 'educator') {
+        setIsEducator(true)
+    }
     try {
-        if (user .publicMetadata.role === 'educator') {
-            setIsEducator(true)
-        }
         const token = await getToken();
         const { data } = await axios.get(backendUrl + '/api/user/data',
             { headers: { Authorization: `Bearer ${token}` } })
         if (data.success) {
             setUserData(data.user)
-        } else (
+        } 
+        else (
             toast.error(data.message)
         )
     } catch (error) {
@@ -60,11 +59,9 @@ const fetchUserData = async () => {
 
     // calculate rating
     const calculateRating = (course) => {
-
         if (course.courseRatings.length === 0) {
             return 0
         }
-
         let totalRating = 0
         course.courseRatings.forEach(rating => {
             totalRating += rating.rating
@@ -105,20 +102,18 @@ const fetchUserData = async () => {
 
     //  is user enrolled in a course
      const fetchUserEnrolledCourses = async () => {
-        // setEnrolledCourses(dummyCourses)
         try {
             const token = await getToken();
-        const { data } = await axios.get(backendUrl + '/api/user/enrolled-courses',
+            const { data } = await axios.get(backendUrl + '/api/user/enrolled-courses',
             { headers: { Authorization: `Bearer ${token}` } })
-        if (data.success) {
-            setEnrolledCourses(data.enrolledCourses.reverse())
-        } else (
-            toast.error(data.message)
-        )
+            if (data.success) {
+                setEnrolledCourses(data.enrolledCourses.reverse())
+            } else (
+                toast.error(data.message)
+            )
         } catch (error) {
             toast.error(error.message)
         }  
-
      }
 
 
@@ -126,12 +121,7 @@ const fetchUserData = async () => {
     // Fetch User's Data if User is Logged In
     useEffect(() => {
         fetchAllCourses()
-        // fetchUserEnrolledCourses()
     }, [])
-
-    // const logToken = async () => {
-    //     console.log(await getToken())
-    // }
 
      // Fetch User's Data if User is Logged In
      useEffect(() => {
